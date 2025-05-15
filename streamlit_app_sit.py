@@ -44,6 +44,12 @@ with st.sidebar:
     )
     voice_id = voice_map[voice_name]
 
+# Add a button to end chat and clear history
+st.sidebar.markdown("---")
+if st.sidebar.button("🛑 End Chat & Clear History"):
+    st.session_state.chat_history = []
+    st.experimental_rerun()
+
 # —————————————————————————————
 # Main UI
 # —————————————————————————————
@@ -70,8 +76,8 @@ except AttributeError:
     audio_recording = None
     audio_input_supported = False
 
-# Handle new user message
-if audio_file or (audio_input_supported and audio_recording):
+# Handle new user message (continuous chat)
+if (audio_file or (audio_input_supported and audio_recording)) and not st.session_state.get("chat_ended", False):
     if audio_file:
         path = os.path.join(UPLOAD_DIR, audio_file.name)
         with open(path, "wb") as f:
