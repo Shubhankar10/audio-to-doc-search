@@ -1,7 +1,7 @@
 # app/tts_elevenlabs.py
 
 import requests
-from instance.config import ELEVENLABS_API_KEY
+from app.instance.config import ELEVENLABS_API_KEY
 
 def list_voices() -> dict:
     """

@@ -1,7 +1,7 @@
 # app/stt_elevenlabs.py
 
 import requests
-from instance import config
+from app.instance.config import ELEVENLABS_API_KEY
 
 def transcribe_audio(audio_path: str, language: str = "en") -> str:
     """
@@ -9,7 +9,7 @@ def transcribe_audio(audio_path: str, language: str = "en") -> str:
     Optionally forces the language via `language_code`.
     """
     url = "https://api.elevenlabs.io/v1/speech-to-text"
-    headers = {"xi-api-key": config.ELEVENLABS_API_KEY}
+    headers = {"xi-api-key": ELEVENLABS_API_KEY}
 
     data = {
         "model_id": "scribe_v1",        # required

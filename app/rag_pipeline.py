@@ -1,7 +1,6 @@
-from langchain_ollama import OllamaEmbeddings
+from langchain_ollama import OllamaEmbeddings, OllamaLLM
 from langchain_community.vectorstores import Chroma
 from langchain.chains import RetrievalQA
-from langchain.llms import Ollama
 
 
 def load_db():
@@ -16,26 +15,16 @@ def load_db():
 
 def query_llm(vector_db,query):
     # Load the LLM
-    llm = Ollama(model="deepseek-r1")
+    llm = OllamaLLM(model="deepseek-r1")
 
     # Create a RetrievalQA chain
     qa_chain = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=vector_db.as_retriever())
 
-    response = qa_chain.run(query)
+    response = qa_chain.invoke({'query': query})
 
     print("\nLLM Response in rag_pipeline:")
     print(response)
     return response
-
-
-
-
-
-
-
-
-
-
 
 
 vector_db = load_db()

@@ -1,3 +1,5 @@
 __pycache__/
 venv/
 vector_context/
+app/instance/config.py
+uploads/

@@ -5,6 +5,7 @@ import streamlit as st
 from app.stt_elevenlabs import transcribe_audio
 from app.tts_elevenlabs import list_voices, text_to_speech
 from app.rag_pipeline import llm_response_finance  # or your llm_response function
+from app.rag_pipeline import llm_response_sit  # or your llm_response function
 
 # —————————————————————————————
 # Setup
@@ -55,21 +56,26 @@ audio_file = st.file_uploader(
     key="upload_file"
 )
 
-# Record widget
-audio_recording = st.audio_input(
-    "Or record your question:",
-    label_visibility="visible",
-    key="record_audio"
-)
+# Try to use st.audio_input if available (for future compatibility), else fallback to file_uploader only
+try:
+    audio_recording = st.audio_input(
+        "Or record your question:",
+        label_visibility="visible",
+        key="record_audio"
+    )
+    audio_input_supported = True
+except AttributeError:
+    audio_recording = None
+    audio_input_supported = False
 
 # When we have audio, save + transcribe once
-if audio_file or audio_recording:
+if audio_file or (audio_input_supported and audio_recording):
     if audio_file:
         path = os.path.join(UPLOAD_DIR, audio_file.name)
         with open(path, "wb") as f:
             f.write(audio_file.getbuffer())
         st.success(f"📥 Saved upload to `{path}`")
-    else:
+    elif audio_input_supported and audio_recording:
         path = os.path.join(UPLOAD_DIR, "mic_recording.wav")
         with open(path, "wb") as f:
             f.write(audio_recording.read())
@@ -93,7 +99,8 @@ if st.session_state.transcript:
     # Query LLM
     if st.button("💡 Get Answer", key="get_answer"):
         with st.spinner("🤖 Thinking…"):
-            st.session_state.response = llm_response_finance(editable)
+            # st.session_state.response = llm_response_finance(editable)
+            st.session_state.response = llm_response_sit(editable)
 
 # Display LLM response if we have one
 if st.session_state.response:
