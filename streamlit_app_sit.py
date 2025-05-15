@@ -48,7 +48,9 @@ with st.sidebar:
 st.sidebar.markdown("---")
 if st.sidebar.button("🛑 End Chat & Clear History"):
     st.session_state.chat_history = []
-    st.experimental_rerun()
+    st.session_state.response = None
+    st.session_state.transcript = None
+    # Instead of st.experimental_rerun(), use st.session_state to clear and rely on Streamlit's rerun on widget interaction
 
 # —————————————————————————————
 # Main UI
