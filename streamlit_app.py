@@ -4,7 +4,7 @@ import os
 import streamlit as st
 from app.stt_elevenlabs import transcribe_audio
 from app.tts_elevenlabs import list_voices, text_to_speech
-from app.rag_pipeline import llm_response  # or your llm_response function
+from app.rag_pipeline import llm_response_finance  # or your llm_response function
 
 # —————————————————————————————
 # Setup
@@ -93,7 +93,7 @@ if st.session_state.transcript:
     # Query LLM
     if st.button("💡 Get Answer", key="get_answer"):
         with st.spinner("🤖 Thinking…"):
-            st.session_state.response = llm_response(editable)
+            st.session_state.response = llm_response_finance(editable)
 
 # Display LLM response if we have one
 if st.session_state.response:
