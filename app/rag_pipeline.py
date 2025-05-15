@@ -41,6 +41,11 @@ def query_llm(vector_db,query):
 vector_db = load_db()
 
 def llm_response(query: str) -> str:
-    #Modify the query here 
-    response = query_llm(vector_db, query)
+    # Add a financial knowledge prompt to guide the LLM
+    system_prompt = (
+        "You are a financial expert. Use the information from the provided documents and your financial knowledge to answer the following question as accurately and concisely as possible. "
+        "If the answer is not present in the documents, say so.\n\nQuestion: "
+    )
+    full_prompt = system_prompt + query
+    response = query_llm(vector_db, full_prompt)
     return response
