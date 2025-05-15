@@ -13,18 +13,23 @@ def load_db():
     return vector_db
 
 
-def query_llm(vector_db,query):
+def query_llm(vector_db, query):
     # Load the LLM
     llm = OllamaLLM(model="deepseek-r1")
-
     # Create a RetrievalQA chain
     qa_chain = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=vector_db.as_retriever())
-
     response = qa_chain.invoke({'query': query})
-
+    # Remove <think>...</think> if present in the response
+    import re
+    if isinstance(response, dict) and "result" in response:
+        result = response["result"]
+    else:
+        result = response
+    # Remove <think>...</think> tags and their content
+    result = re.sub(r'<think>.*?</think>', '', result, flags=re.DOTALL).strip()
     print("\nLLM Response in rag_pipeline:")
-    print(response)
-    return response
+    print(result)
+    return result
 
 
 vector_db = load_db()
