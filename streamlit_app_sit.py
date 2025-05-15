@@ -138,7 +138,7 @@ st.markdown(
 )
 
 # Clear logic
-if st.session_state.get("clear_chat", False) or st.experimental_get_query_params().get("clear_chat"):
+if st.session_state.get("clear_chat", False) or st.query_params.get("clear_chat"):
     st.session_state.chat_history = []
     st.session_state.response = None
     st.session_state.transcript = None
