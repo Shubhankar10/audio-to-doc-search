@@ -206,14 +206,9 @@ except Exception as e:
 # Main UI
 # —————————————————————————————
 
-col1, col2 = st.columns([1, 4])
-with col1:
-    # Logo
-    st.image("sit-data/logo.png", width=80)
-
-with col2:
-    st.title("🎤 Medical Voice Assistant")
-    st.markdown("<p style='margin-top:-15px;'>An AI debate partner powered by voice - just like talking to Siri</p>", unsafe_allow_html=True)
+# Use full width for the title
+st.title("🎤 Medical Voice Assistant")
+st.markdown("<p style='margin-top:-15px;'>An AI debate partner powered by voice </p>", unsafe_allow_html=True)
 
 # Debate setup (only show if debate not started)
 if not st.session_state.debate_started:
