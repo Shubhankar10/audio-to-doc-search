@@ -308,39 +308,57 @@ if st.session_state.debate_started:
         """,
         unsafe_allow_html=True
     )
-      # Render chat history with enhanced bubbles
-    for msg in st.session_state.chat_history:
+    
+    # Render chat history with enhanced bubbles
+    for idx, msg in enumerate(st.session_state.chat_history):
         if msg["role"] == "user":
             chat_container.markdown(
-                f"""
+                f'''
                 <div class="message-bubble user-bubble">
+                    <div class="avatar user">🧑</div>
                     <strong>You</strong>
                     <p style="color: black;">{msg["text"]}</p>
                 </div>
-                """, 
+                ''',
                 unsafe_allow_html=True
             )
             # Play user audio
             if msg == st.session_state.chat_history[-1] and msg["audio"]:
                 chat_container.audio(msg["audio"], format="audio/wav")
         else:
+            # Add a unique id for the lips div for JS control
+            lips_id = f"lips-{idx}"
             chat_container.markdown(
-                f"""
+                f'''
                 <div class="message-bubble ai-bubble">
+                    <div class="avatar ai">
+                        <svg width="32" height="32" viewBox="0 0 32 32">
+                            <circle cx="16" cy="16" r="16" fill="#b3e5fc"/>
+                            <ellipse cx="16" cy="20" rx="9" ry="6" fill="#fff"/>
+                        </svg>
+                        <div class="lips" id="{lips_id}"></div>
+                    </div>
                     <strong>AI</strong>
                     <p style="color: black;">{msg["text"]}</p>
                 </div>
-                """, 
+                ''',
                 unsafe_allow_html=True
             )
-            # Auto-play the most recent AI message
+            # Auto-play the most recent AI message and animate lips
             if msg == st.session_state.chat_history[-1] and msg["audio"]:
-                # Use auto-play for the audio
                 with chat_container:
                     st.audio(msg["audio"], format="audio/mp3", autoplay=True)
-                    # Set the state to listening mode after AI completes its response
-                    if st.session_state.auto_listen:
-                        st.session_state.listening = True
+                    # Add JS to animate lips while audio is playing
+                    st.markdown(f'''
+                    <script>
+                    const audio = document.querySelector('audio');
+                    const lips = document.getElementById('{lips_id}');
+                    if(audio && lips){{
+                        audio.onplay = () => lips.classList.add('talking');
+                        audio.onended = () => lips.classList.remove('talking');
+                    }}
+                    </script>
+                    ''', unsafe_allow_html=True)
     
     chat_container.markdown("</div>", unsafe_allow_html=True)
     
@@ -410,7 +428,8 @@ if st.session_state.debate_started:
                         break
     
     st.markdown("</div>", unsafe_allow_html=True)
-      # Process voice input
+    
+    # Process voice input
     if audio_input_supported and audio_recording:
         path = os.path.join(UPLOAD_DIR, "mic_recording.wav")
         
