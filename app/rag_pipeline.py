@@ -54,3 +54,43 @@ def llm_response_sit(query: str) -> str:
     full_prompt = system_prompt + query
     response = query_llm(vector_db, full_prompt)
     return response
+
+# For medical debate
+def llm_response_medical_debate(query: str, debate_side: str = "for", debate_round: int = 1) -> str:
+    if "Topic:" in query and "User's opening argument:" in query:
+        parts = query.split("User's opening argument:")
+        topic_part = parts[0].strip()
+        topic = topic_part.replace("Topic:", "").strip()
+        user_argument = parts[1].strip()
+        
+        system_prompt = (
+            f"You are participating in a formal debate on medical topics. You are arguing {debate_side.upper()} "
+            f"the following medical proposition: '{topic}'. "
+            f"Respond to your opponent's opening argument. "
+            f"Be persuasive, logical, and cite medical evidence when possible. "
+            f"Keep your response concise (100-150 words). Sound like a confident medical professional in a debate.\n\n"
+            f"Your opponent just said: {user_argument}\n\n"
+            f"Your response: "
+        )
+        
+        full_prompt = system_prompt
+    else:
+        system_prompt = (
+            f"You are participating in a formal debate on medical topics. You are arguing {debate_side.upper()} "
+            f"the proposition. This is round {debate_round}. "
+            f"Address your opponent's previous arguments while advancing your position. "
+            f"Be persuasive, logical, and cite medical evidence when possible. "
+            f"Keep your response concise (100-150 words). Sound like a confident medical professional in a debate.\n\n"
+            f"Your opponent just said: {query}\n\n"
+            f"Your response: "
+        )
+        
+        full_prompt = system_prompt
+    
+    if vector_db:
+        response = query_llm(vector_db, full_prompt)
+    else:
+        llm = OllamaLLM(model="deepseek-r1")
+        response = llm.invoke(full_prompt)
+        
+    return response
