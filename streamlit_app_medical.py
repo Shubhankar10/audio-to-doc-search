@@ -308,15 +308,14 @@ if st.session_state.debate_started:
         """,
         unsafe_allow_html=True
     )
-    
-    # Render chat history with enhanced bubbles
+      # Render chat history with enhanced bubbles
     for msg in st.session_state.chat_history:
         if msg["role"] == "user":
             chat_container.markdown(
                 f"""
                 <div class="message-bubble user-bubble">
                     <strong>You</strong>
-                    <p>{msg["text"]}</p>
+                    <p style="color: black;">{msg["text"]}</p>
                 </div>
                 """, 
                 unsafe_allow_html=True
@@ -329,7 +328,7 @@ if st.session_state.debate_started:
                 f"""
                 <div class="message-bubble ai-bubble">
                     <strong>AI</strong>
-                    <p>{msg["text"]}</p>
+                    <p style="color: black;">{msg["text"]}</p>
                 </div>
                 """, 
                 unsafe_allow_html=True
