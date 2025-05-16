@@ -97,20 +97,90 @@ if (audio_file or (audio_input_supported and audio_recording)) and not st.sessio
         "audio": bot_audio
     })
 
-# Display chat history
-st.markdown("---")
-st.markdown("### Chat History")
+# Display chat history as a chatbot interface
+st.markdown("""
+<style>
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 80px;
+}
+.chat-row {
+    display: flex;
+    align-items: flex-end;
+}
+.bot-message {
+    background: #f1f0f0;
+    color: #222;
+    border-radius: 16px 16px 16px 4px;
+    padding: 12px 16px;
+    max-width: 60%;
+    margin-right: auto;
+    box-shadow: 0 2px 8px #0001;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+}
+.user-message {
+    background: #4b8bff;
+    color: #fff;
+    border-radius: 16px 16px 4px 16px;
+    padding: 12px 16px;
+    max-width: 60%;
+    margin-left: auto;
+    box-shadow: 0 2px 8px #0001;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    flex-direction: row-reverse;
+}
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+</style>
+<div class="chat-container">
+""", unsafe_allow_html=True)
+
 for msg in st.session_state.chat_history:
     if msg["role"] == "user":
-        st.markdown("**You:**")
-        st.write(msg["text"])
+        st.markdown(f"""
+        <div class="chat-row">
+            <div class="user-message">
+                <div class="avatar">🧑</div>
+                <div>
+                    <div style='margin-bottom:4px;'><b>You</b></div>
+                    <div>{msg['text']}</div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         if msg["audio"]:
             st.audio(msg["audio"], format="audio/wav")
     else:
-        st.markdown("**SIT Bot:**")
-        st.write(msg["text"])
+        st.markdown(f"""
+        <div class="chat-row">
+            <div class="bot-message">
+                <div class="avatar"><img src='https://img.freepik.com/free-vector/chatbot-chat-message-vectorart_78370-4104.jpg?semt=ais_hybrid&w=740' width='32' height='32'/></div>
+                <div>
+                    <div style='margin-bottom:4px;'><b>SIT Bot</b></div>
+                    <div>{msg['text']}</div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         if msg["audio"]:
             st.audio(msg["audio"], format="audio/mp3")
+
+st.markdown("</div>", unsafe_allow_html=True)
 
 # —————————————————————————————
 # End Chat Button (bottom right)
