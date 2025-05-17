@@ -41,11 +41,23 @@ def process_audio_for_vad(audio_data, rate=44100):
         silence_duration=st.session_state.vad_timeout,
         on_silence_callback=on_silence_detected
     )
+    
     # Convert to numpy array if needed
     if not isinstance(audio_data, np.ndarray):
         try:
+            # Sample size for 32-bit float is 4 bytes
+            sample_size = 4  # bytes per sample for float32
+            
+            # Ensure audio data is properly aligned
+            if len(audio_data) % sample_size != 0:
+                # Add padding bytes to make it aligned
+                padding_bytes = b"\x00" * (sample_size - (len(audio_data) % sample_size))
+                audio_data = audio_data + padding_bytes
+                
+            # Convert to numpy array for processing
             audio_data = np.frombuffer(audio_data, dtype=np.float32)
-        except:
+        except Exception as e:
+            st.warning(f"Audio conversion error: {str(e)}")
             return False
             
     return vad.process_audio(audio_data)
