@@ -242,89 +242,62 @@ def render_setup_panel(voice_map):
         )
 
 
-# —————————————————————————————
-# Debate Interface UI
-# —————————————————————————————
 def render_debate_interface():
     """
-    Render the ongoing debate interface:
-    - Title and topic header
-    - Chat history container with user/AI bubbles
-    - Voice controls and recording logic
+    Simplified debate UI without custom bubble renderer.
+    Uses Streamlit’s built-in chat API to display history,
+    and audio_input/file_uploader for voice input.
     """
-    st.markdown("<div class='main-container'>", unsafe_allow_html=True)
-    st.markdown(
-        f"""
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-          <div><h3 style="margin:0;">{st.session_state.debate_topic}</h3>
-          <p style="margin:0;color:#666;">AI argues <strong>{st.session_state.debate_side.upper()}</strong></p></div>
-          <div><span class="keyboard-shortcut">Press Space to speak</span></div>
-        </div><hr>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.header("📢 Debate: " + st.session_state.debate_topic)
+    st.subheader(f"AI argues **{st.session_state.debate_side.upper()}**")
 
-    # Show chat history
-    with st.container():
-        st.markdown(
-            "<div id='chat-container' style='height:350px;overflow-y:auto;margin-bottom:20px;padding-right:10px;'>",
-            unsafe_allow_html=True,
-        )
-        for idx, msg in enumerate(st.session_state.chat_history):
-            render_message_bubbles(msg, idx)
-        st.markdown("</div>", unsafe_allow_html=True)
+    # Display chat history using st.chat_message
+    for msg in st.session_state.chat_history:
+        role = msg.get("role", "user")
+        text = msg.get("text", "")
+        audio = msg.get("audio")
+        with st.chat_message(role):
+            st.markdown(text)
+            if audio:
+                st.audio(audio, format="audio/mp3")
 
-    st.markdown("<hr>", unsafe_allow_html=True)
+    st.markdown("---")
 
-    # Listening indicator
-    if st.session_state.listening:
-        render_listening_animation()
-    else:
-        st.markdown(
-            "<div style='text-align:center;color:#666;margin:15px 0;'>AI is thinking...</div>",
-            unsafe_allow_html=True,
-        )
-
-    # Controls: New Debate, Record, Replay
+    # Controls
     col1, col2, col3 = st.columns([2, 3, 2])
     with col1:
-        if st.button("⏹️ New Debate", type="secondary"):
+        if st.button("🔄 New Debate", key="new_debate"):
             st.session_state.debate_started = False
             st.session_state.chat_history = []
-            st.rerun()
+            st.experimental_rerun()
 
+    # Determine live mic support and get audio_data
     with col2:
-        audio_input_supported = True
         try:
+            live_supported = True
             audio_data = st.audio_input(
-                "Speak your argument...",
+                label="🎤 Speak your argument",
                 key="voice_input",
-                label_visibility="collapsed",
-                on_change=lambda: st.session_state.__setitem__("recording", not st.session_state.recording),
+                label_visibility="collapsed"
             )
-            st.markdown(
-                "<div style='text-align:center;font-size:0.8em;color:#666;'>"
-                "Press Space to speak; stops after you pause"
-                "</div>",
-                unsafe_allow_html=True,
+        except Exception:
+            live_supported = False
+            st.warning("Mic input not supported. Please upload:")
+            audio_data = st.file_uploader(
+                "Upload MP3/WAV:",
+                type=["mp3", "wav"],
+                key="upload_recording"
             )
-        except AttributeError:
-            audio_input_supported = False
-            st.warning("Live voice input not supported. Please upload a recording.")
-            audio_data = st.file_uploader("Upload recording (MP3/WAV):", type=["mp3", "wav"])
 
     with col3:
-        if st.session_state.chat_history:
-            if st.button("🔄 Replay Last", type="secondary"):
-                for m in reversed(st.session_state.chat_history):
-                    if m["role"] == "bot" and m["audio"]:
-                        st.audio(m["audio"], format="audio/mp3", autoplay=True)
-                        break
+        if st.session_state.chat_history and st.button("▶️ Replay Last", key="replay_last"):
+            for m in reversed(st.session_state.chat_history):
+                if m.get("role") == "bot" and m.get("audio"):
+                    st.audio(m["audio"], format="audio/mp3", autoplay=True)
+                    break
 
-    # Handle incoming audio (live or upload)
-    handle_audio_input(audio_data, audio_input_supported)
-    st.markdown("</div>", unsafe_allow_html=True)
-
+    # Process the incoming audio (live or uploaded)
+    handle_audio_input(audio_data, live_supported)
 
 # —————————————————————————————
 # Audio Processing & Debate Logic
