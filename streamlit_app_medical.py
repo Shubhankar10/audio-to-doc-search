@@ -28,15 +28,24 @@ UPLOAD_DIR = "uploads"
 # —————————————————————————————
 # Helper Functions
 # —————————————————————————————
-def ensure_upload_dir():
-    """Ensure the upload directory exists."""
+def ensure_upload_dir() -> None:
+    """
+    Ensure the upload directory exists.
+    Creates the UPLOAD_DIR if it does not already exist.
+
+    Returns:
+        None
+    """
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
-def on_silence_detected():
+def on_silence_detected() -> None:
     """
     Callback invoked by VAD when silence is detected.
     Simulates a click on the Record button to stop recording.
+
+    Returns:
+        None
     """
     if st.session_state.recording:
         js = """
@@ -53,11 +62,11 @@ def process_audio_for_vad(audio_bytes: bytes, rate: int = 44100) -> bool:
     Run Voice Activity Detection on raw audio bytes.
 
     Args:
-        audio_bytes: Raw audio buffer.
-        rate: Sample rate (Hz).
+        audio_bytes (bytes): Raw audio buffer.
+        rate (int, optional): Sample rate (Hz). Defaults to 44100.
 
     Returns:
-        Whether speech is currently active.
+        bool: Whether speech is currently active.
     """
     vad = VoiceActivityDetector(
         silence_threshold=0.03,
@@ -77,9 +86,12 @@ def process_audio_for_vad(audio_bytes: bytes, rate: int = 44100) -> bool:
     return vad.process_audio(audio_data)
 
 
-def load_voices():
+def load_voices() -> dict:
     """
     Fetch available TTS voices from ElevenLabs and store in session_state.
+
+    Returns:
+        dict: Mapping of voice names to voice IDs.
     """
     try:
         voices = list_voices().get("voices", [])
@@ -104,9 +116,12 @@ def load_voices():
 # —————————————————————————————
 # Session State Initialization
 # —————————————————————————————
-def init_session_state():
+def init_session_state() -> None:
     """
     Ensure all required session_state keys exist with sensible defaults.
+
+    Returns:
+        None
     """
     defaults = {
         "response": None,
@@ -131,8 +146,13 @@ def init_session_state():
 # —————————————————————————————
 # UI Setup
 # —————————————————————————————
-def setup_page():
-    """Configure the Streamlit page and inject custom CSS & JS."""
+def setup_page() -> None:
+    """
+    Configure the Streamlit page and inject custom CSS & JS.
+
+    Returns:
+        None
+    """
     st.set_page_config(
         page_title="Medical Voice Debate",
         layout="centered",
@@ -180,13 +200,15 @@ def setup_page():
 # —————————————————————————————
 # Debate Setup UI
 # —————————————————————————————
-def render_setup_panel(voice_map):
+def render_setup_panel(voice_map: dict) -> None:
     """
-    Render the initial debate setup panel:
-    - Topic input
-    - AI side selection
-    - Voice and advanced settings
-    - Start Debate button
+    Render the initial debate setup panel.
+
+    Args:
+        voice_map (dict): Mapping of voice names to voice IDs.
+
+    Returns:
+        None
     """
     st.markdown("<div class='main-container'>", unsafe_allow_html=True)
     st.markdown("### Start a New Debate")
@@ -242,11 +264,12 @@ def render_setup_panel(voice_map):
         )
 
 
-def render_debate_interface():
+def render_debate_interface() -> None:
     """
-    Simplified debate UI without custom bubble renderer.
-    Uses Streamlit’s built-in chat API to display history,
-    and audio_input/file_uploader for voice input.
+    Render the simplified debate UI using Streamlit’s built-in chat API.
+
+    Returns:
+        None
     """
     st.header("📢 Debate: " + st.session_state.debate_topic)
     st.subheader(f"AI argues **{st.session_state.debate_side.upper()}**")
@@ -299,11 +322,12 @@ def render_debate_interface():
     # Process the incoming audio (live or uploaded)
     handle_audio_input(audio_data, live_supported)
 
-def render_main_ui():
+def render_main_ui() -> None:
     """
-    New layout:
-      - Right collapsible sidebar for chat history
-      - Center-left: Record button + Play AI response button (invokes TTS)
+    Render the main debate UI with sidebar and main area.
+
+    Returns:
+        None
     """
     # === Sidebar: Chat History ===
     with st.sidebar.expander("💬 Chat History", expanded=False):
@@ -366,10 +390,17 @@ def render_main_ui():
 # —————————————————————————————
 # Audio Processing & Debate Logic
 # —————————————————————————————
-def handle_audio_input(audio_data, live_supported: bool):
+def handle_audio_input(audio_data, live_supported: bool) -> None:
     """
     Process user audio (live or uploaded), transcribe, generate AI response,
     and update chat_history accordingly.
+
+    Args:
+        audio_data: Audio input data (live or uploaded).
+        live_supported (bool): Whether live mic input is supported.
+
+    Returns:
+        None
     """
     if live_supported and audio_data:
         file_path = os.path.join(UPLOAD_DIR, "mic_recording.wav")
@@ -405,12 +436,16 @@ def handle_audio_input(audio_data, live_supported: bool):
         _process_user_text(user_text, audio_bytes)
 
 
-def _process_user_text(user_text: str, audio_bytes: bytes):
+def _process_user_text(user_text: str, audio_bytes: bytes) -> None:
     """
-    Shared logic for handling new user text:
-    - Deduplication
-    - Adding to history
-    - Generating & appending AI response
+    Shared logic for handling new user text.
+
+    Args:
+        user_text (str): Transcribed user input.
+        audio_bytes (bytes): Raw audio bytes.
+
+    Returns:
+        None
     """
     if not user_text or user_text == st.session_state.last_user_input:
         st.session_state.listening = True
@@ -453,8 +488,13 @@ def _process_user_text(user_text: str, audio_bytes: bytes):
 # —————————————————————————————
 # Footer & URL Reset
 # —————————————————————————————
-def handle_footer_and_reset():
-    """Render footer captions and handle URL-based chat reset."""
+def handle_footer_and_reset() -> None:
+    """
+    Render footer captions and handle URL-based chat reset.
+
+    Returns:
+        None
+    """
     if st.session_state.debate_started:
         st.caption("Use Space bar to start/stop recording.")
         st.caption("Click 'New Debate' to restart.")
@@ -468,8 +508,13 @@ def handle_footer_and_reset():
 # —————————————————————————————
 # Main
 # —————————————————————————————
-def main():
-    """Main entry point for the Streamlit app."""
+def main() -> None:
+    """
+    Main entry point for the Streamlit app.
+
+    Returns:
+        None
+    """
     ensure_upload_dir()
     init_session_state()
     setup_page()
