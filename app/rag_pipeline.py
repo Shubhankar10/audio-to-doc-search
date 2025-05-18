@@ -186,7 +186,8 @@ def llm_response_medical_debate(
         "  1. Address a specific sentence by the user using “As you said <…>, ...”\n"
         "  2. Fact-check any dubious claims (e.g., if the user says “1+1=3”, point out that this is incorrect and why).\n"
         "  3. Be persuasive, logical, cite medical evidence when possible.\n"
-        "  4. Keep it concise (100–150 words).\n\n"
+        "  4. Keep it in nearly 250–300 words.\n\n"
+        "  5. You are generating response for a audio debate so keep the grammer and response like a speech.\n\n"
     )
 
     if debate_round == 1:

@@ -299,6 +299,70 @@ def render_debate_interface():
     # Process the incoming audio (live or uploaded)
     handle_audio_input(audio_data, live_supported)
 
+def render_main_ui():
+    """
+    New layout:
+      - Right collapsible sidebar for chat history
+      - Center-left: Record button + Play AI response button (invokes TTS)
+    """
+    # === Sidebar: Chat History ===
+    with st.sidebar.expander("💬 Chat History", expanded=False):
+        for msg in st.session_state.chat_history:
+            role = msg["role"].capitalize()
+            st.markdown(f"**{role}:** {msg['text']}")
+        if st.button("🧹 Clear History", key="clear_history"):
+            st.session_state.chat_history = []
+
+    # === Main area ===
+    st.title("🧠 Medical Voice Debate")
+    st.markdown(f"**Topic:** {st.session_state.debate_topic}")
+    st.markdown(f"**AI argues:** {st.session_state.debate_side.upper()}")
+
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        st.markdown("### 🎙️ Your Turn")
+        try:
+            audio_data = st.audio_input(
+                label="Record your argument",
+                key="ui_voice_input",
+                label_visibility="collapsed",
+            )
+        except Exception:
+            st.warning("Mic not supported. Upload instead:")
+            audio_data = st.file_uploader(
+                "Upload MP3/WAV:",
+                type=["mp3", "wav"],
+                key="ui_file_uploader",
+            )
+        handle_audio_input(audio_data, audio_data is not None)
+
+    with col2:
+        st.markdown("### 🔊 AI’s Turn")
+        # find last bot message text
+        last_bot = next(
+            (m for m in reversed(st.session_state.chat_history) if m["role"] == "bot"),
+            None
+        )
+        if last_bot:
+            raw = last_bot["text"]
+            if "</think>" in raw:
+                bot_text = raw.split("</think>", 1)[1].strip()
+            else:
+                bot_text = raw
+                
+            if st.button("▶️ Play AI Response", key="play_ai"):
+                # call your TTS function here
+                tts_bytes = text_to_speech(
+                    text=bot_text,
+                    voice_id=st.session_state.voice_id
+                )
+                if tts_bytes:
+                    st.audio(tts_bytes, format="audio/mp3")
+                else:
+                    st.error("TTS failed. Check console for details.")
+        else:
+            st.info("Awaiting your argument…")
+
 # —————————————————————————————
 # Audio Processing & Debate Logic
 # —————————————————————————————
@@ -414,7 +478,8 @@ def main():
     if not st.session_state.debate_started:
         render_setup_panel(voice_map)
     else:
-        render_debate_interface()
+        # render_debate_interface()
+        render_main_ui()
 
     handle_footer_and_reset()
 
