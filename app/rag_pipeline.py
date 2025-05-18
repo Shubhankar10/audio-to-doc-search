@@ -194,6 +194,14 @@ def summarize_debate_history(
     Summarize the debate history into two parts:
     - user_summary: key points from all user arguments
     - llm_summary: key points from all LLM responses
+
+    Args:
+        history (List[Tuple[str, str]]): A list of tuples, each containing a user argument and the corresponding LLM response for each debate round.
+
+    Returns:
+        Tuple[str, str]:
+            - user_summary: Concatenated key points from all user arguments.
+            - llm_summary: Concatenated key points from all LLM responses.
     """
     user_points = []
     llm_points = []
@@ -217,6 +225,15 @@ def llm_response_medical_debate(
     - Includes a counter to a specific user sentence ("As you said...")
     - Fact-checks user claims (e.g., "1+1=3")
     - On rounds >1, prepends summaries of past arguments
+
+    Args:
+        user_input (str): The latest argument or statement from the user.
+        history (List[Tuple[str, str]], optional): List of tuples containing previous user arguments and LLM responses. Defaults to None.
+        debate_side (str, optional): The side of the debate ("for" or "against"). Defaults to "for".
+        debate_round (int, optional): The current round of the debate. Defaults to 1.
+
+    Returns:
+        str: The LLM's debate response as a string.
     """
     topic = "AI in healthcare, allowing AI to override human decisions in healthcare."
     # Prepare summaries if we have history
