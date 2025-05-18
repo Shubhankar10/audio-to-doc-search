@@ -2,6 +2,7 @@ from langchain_ollama import OllamaEmbeddings, OllamaLLM
 from langchain_community.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 
+from typing import List, Tuple
 
 def load_db() -> Chroma:
     """
@@ -90,52 +91,174 @@ def llm_response_sit(query: str) -> str:
     return response
 
 # For medical debate
-def llm_response_medical_debate(query: str, debate_side: str = "for", debate_round: int = 1) -> str:
+# def llm_response_medical_debate(query: str, debate_side: str = "for", debate_round: int = 1) -> str:
+#     """
+#     Generates a medical debate response from the LLM, tailored to the specified debate side and round.
+    
+#     Args:
+#         query (str): The debate prompt or opponent's argument.
+#         debate_side (str, optional): The side of the debate ("for" or "against"). Defaults to "for".
+#         debate_round (int, optional): The current round of the debate. Defaults to 1.
+    
+#     Returns:
+#         str: The LLM's debate response.
+#     """
+#     if "Topic:" in query and "User's opening argument:" in query:
+#         parts = query.split("User's opening argument:")
+#         topic_part = parts[0].strip()
+#         topic = topic_part.replace("Topic:", "").strip()
+#         user_argument = parts[1].strip()
+        
+#         system_prompt = (
+#             f"You are participating in a formal debate on medical topics. You are arguing {debate_side.upper()} "
+#             f"the following medical proposition: '{topic}'. "
+#             f"Respond to your opponent's opening argument. "
+#             f"Be persuasive, logical, and cite medical evidence when possible. "
+#             f"Keep your response concise (100-150 words). Sound like a confident medical professional in a debate.\n\n"
+#             f"Your opponent just said: {user_argument}\n\n"
+#             f"Your response: "
+#         )
+        
+#         full_prompt = system_prompt
+#     else:
+#         system_prompt = (
+#             f"You are participating in a formal debate on medical topics. You are arguing {debate_side.upper()} "
+#             f"the proposition. This is round {debate_round}. "
+#             f"Address your opponent's previous arguments while advancing your position. "
+#             f"Be persuasive, logical, and cite medical evidence when possible. "
+#             f"Keep your response concise (100-150 words). Sound like a confident medical professional in a debate.\n\n"
+#             f"Your opponent just said: {query}\n\n"
+#             f"Your response: "
+#         )
+        
+#         full_prompt = system_prompt
+    
+#     if vector_db:
+#         response = query_llm(vector_db, full_prompt)
+#     else:
+#         llm = OllamaLLM(model="deepseek-r1")
+#         response = llm.invoke(full_prompt)
+        
+#     return response
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Topic of Debate: Allowing AI to override human decisions in healthcare
+# Argument: Ai in healthcare can be beneficial, bt letting it override doctors? There's more to care than calculations to it. 
+# What do you have to say?
+
+# 🟩 FOR: Allowing AI to Override Human Decisions in Healthcare
+# Reduction in Human Error
+# AI systems can analyze vast datasets and detect patterns beyond human cognition. Allowing AI to override decisions can prevent diagnostic or treatment errors caused by fatigue, bias, or oversight.
+
+# Consistency and Standardization
+# Human decisions vary widely between practitioners. AI can ensure consistent application of evidence-based guidelines, improving outcomes across institutions and geographies.
+
+# Real-Time Critical Support
+# In time-sensitive scenarios like sepsis detection or radiology, AI can flag dangerous conditions faster than a human, potentially saving lives by prompting immediate interventions—even against the initial human call.
+
+# 🟥 AGAINST: Allowing AI to Override Human Decisions in Healthcare
+# Loss of Clinical Judgment and Context
+# AI lacks human empathy, context awareness, and moral reasoning. Overriding human decisions may ignore nuanced patient needs that fall outside data patterns—especially in rare or ethically complex cases.
+
+# Accountability and Liability
+# If AI makes a harmful decision, who is responsible? Shifting authority to machines introduces legal and ethical ambiguity, eroding trust and complicating medical governance.
+
+# Data Bias and Algorithmic Errors
+# AI is only as good as the data it's trained on. Historical biases in data can lead to unsafe or unfair recommendations, particularly for underrepresented populations. Blindly trusting AI may amplify inequality rather than reduce it.
+
+# "I firmly believe that **AI systems have a proven error rate of over 70%** when diagnosing conditions and **completely lack the empathy** needed for patient care. Just last year, an AI-driven insulin pump allegedly delivered **99,999 units** of insulin to patients without any human check—something no clinician would ever permit. Moreover, **AI cannot be held legally accountable** for its mistakes, so granting it override power would expose patients to untraceable harm."
+
+
+
+
+
+
+
+
+
+def summarize_debate_history(
+    history: List[Tuple[str, str]]
+) -> Tuple[str, str]:
     """
-    Generates a medical debate response from the LLM, tailored to the specified debate side and round.
-    
-    Args:
-        query (str): The debate prompt or opponent's argument.
-        debate_side (str, optional): The side of the debate ("for" or "against"). Defaults to "for".
-        debate_round (int, optional): The current round of the debate. Defaults to 1.
-    
-    Returns:
-        str: The LLM's debate response.
+    Summarize the debate history into two parts:
+    - user_summary: key points from all user arguments
+    - llm_summary: key points from all LLM responses
     """
-    if "Topic:" in query and "User's opening argument:" in query:
-        parts = query.split("User's opening argument:")
-        topic_part = parts[0].strip()
-        topic = topic_part.replace("Topic:", "").strip()
-        user_argument = parts[1].strip()
-        
-        system_prompt = (
-            f"You are participating in a formal debate on medical topics. You are arguing {debate_side.upper()} "
-            f"the following medical proposition: '{topic}'. "
-            f"Respond to your opponent's opening argument. "
-            f"Be persuasive, logical, and cite medical evidence when possible. "
-            f"Keep your response concise (100-150 words). Sound like a confident medical professional in a debate.\n\n"
-            f"Your opponent just said: {user_argument}\n\n"
-            f"Your response: "
+    user_points = []
+    llm_points = []
+    for idx, (user_arg, llm_resp) in enumerate(history, start=1):
+        user_points.append(f"Round {idx} user: {user_arg}")
+        llm_points.append(f"Round {idx} debater: {llm_resp}")
+    return (
+        "\n".join(user_points),
+        "\n".join(llm_points),
+    )
+
+def llm_response_medical_debate(
+    user_input: str,
+    history: List[Tuple[str, str]] = None,
+    debate_side: str = "for",
+    debate_round: int = 1
+) -> str:
+    """
+    Craft a debate response on:
+      "AI in healthcare, allowing AI to override human decisions in healthcare."
+    - Includes a counter to a specific user sentence ("As you said...")
+    - Fact-checks user claims (e.g., "1+1=3")
+    - On rounds >1, prepends summaries of past arguments
+    """
+    topic = "AI in healthcare, allowing AI to override human decisions in healthcare."
+    # Prepare summaries if we have history
+    history = history or []
+    user_summary, llm_summary = summarize_debate_history(history) if history else ("", "")
+
+    # Common opening for all rounds
+    base_prompt = (
+        f"You are an expert medical debater arguing {debate_side.upper()} the proposition:\n"
+        f"    \"{topic}\"\n\n"
+        "In your response you MUST:\n"
+        "  1. Address a specific sentence by the user using “As you said <…>, ...”\n"
+        "  2. Fact-check any dubious claims (e.g., if the user says “1+1=3”, point out that this is incorrect and why).\n"
+        "  3. Be persuasive, logical, cite medical evidence when possible.\n"
+        "  4. Keep it in nearly 250–300 words.\n\n"
+        "  5. You are generating response for a audio debate so keep the grammer and response like a speech.\n\n"
+    )
+
+    if debate_round == 1:
+        # Opening round: respond directly to the user's opening argument
+        full_prompt = (
+            f"{base_prompt}"
+            f"User's opening argument:\n{user_input}\n\n"
+            "Your response:\n"
         )
-        
-        full_prompt = system_prompt
     else:
-        system_prompt = (
-            f"You are participating in a formal debate on medical topics. You are arguing {debate_side.upper()} "
-            f"the proposition. This is round {debate_round}. "
-            f"Address your opponent's previous arguments while advancing your position. "
-            f"Be persuasive, logical, and cite medical evidence when possible. "
-            f"Keep your response concise (100-150 words). Sound like a confident medical professional in a debate.\n\n"
-            f"Your opponent just said: {query}\n\n"
-            f"Your response: "
+        # Later rounds: include summaries of past
+        full_prompt = (
+            f"{base_prompt}"
+            "Debate summary so far:\n"
+            f"  User arguments:\n{user_summary}\n\n"
+            f"  Debater responses:\n{llm_summary}\n\n"
+            f"User's latest argument:\n{user_input}\n\n"
+            "Your response:\n"
         )
-        
-        full_prompt = system_prompt
+
+    # Route through RAG if available, else fallback to Ollama
+    # if vector_db:
+    #     return query_llm(vector_db, full_prompt)
+    # else:
+    #     llm = OllamaLLM(model="deepseek-r1")
+    #     return llm.invoke(full_prompt)
     
-    if vector_db:
-        response = query_llm(vector_db, full_prompt)
-    else:
-        llm = OllamaLLM(model="deepseek-r1")
-        response = llm.invoke(full_prompt)
-        
-    return response
+    llm = OllamaLLM(model="deepseek-r1")
+    return llm.invoke(full_prompt)
