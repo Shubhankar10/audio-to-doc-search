@@ -10,17 +10,19 @@ class VoiceActivityDetector:
     This can be used to create a more natural Siri-like conversation flow.
     """
     
-    def __init__(self, 
-                silence_threshold: float = 0.05, 
-                silence_duration: float = 2.0,
-                on_silence_callback: Optional[Callable] = None):
+    def __init__(
+        self,
+        silence_threshold: float = 0.05,
+        silence_duration: float = 2.0,
+        on_silence_callback: Optional[Callable] = None
+    ) -> None:
         """
-        Initialize a voice activity detector
-        
+        Initialize a voice activity detector.
+
         Args:
-            silence_threshold: Amplitude threshold below which audio is considered silence
-            silence_duration: Duration of silence (in seconds) before stopping recording
-            on_silence_callback: Function to call when silence is detected
+            silence_threshold (float): Amplitude threshold below which audio is considered silence.
+            silence_duration (float): Duration of silence (in seconds) before stopping recording.
+            on_silence_callback (Optional[Callable]): Function to call when silence is detected.
         """
         self.silence_threshold = silence_threshold
         self.silence_duration = silence_duration
@@ -33,13 +35,13 @@ class VoiceActivityDetector:
     
     def process_audio(self, audio_data: np.ndarray) -> bool:
         """
-        Process audio chunk and detect if speech has ended
-        
+        Process audio chunk and detect if speech has ended.
+
         Args:
-            audio_data: Numpy array of audio samples
-            
+            audio_data (np.ndarray): Numpy array of audio samples.
+
         Returns:
-            True if recording should stop, False otherwise
+            bool: True if recording should stop, False otherwise.
         """
         # Compute RMS amplitude
         rms = np.sqrt(np.mean(audio_data**2))

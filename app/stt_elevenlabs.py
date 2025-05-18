@@ -5,8 +5,14 @@ from app.instance.config import ELEVENLABS_API_KEY
 
 def transcribe_audio(audio_path: str, language: str = "en") -> str:
     """
-    Send the audio file at audio_path to ElevenLabs STT and return the transcript.
-    Optionally forces the language via `language_code`.
+    Transcribes an audio file using the ElevenLabs Speech-to-Text API.
+
+    Args:
+        audio_path (str): The path to the audio file to be transcribed.
+        language (str, optional): The language code (ISO-639-1 or ISO-639-3) for transcription. Defaults to "en".
+
+    Returns:
+        str: The transcribed text if successful, otherwise an error message.
     """
     url = "https://api.elevenlabs.io/v1/speech-to-text"
     headers = {"xi-api-key": ELEVENLABS_API_KEY}

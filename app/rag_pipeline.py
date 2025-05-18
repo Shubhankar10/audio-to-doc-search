@@ -3,7 +3,13 @@ from langchain_community.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 
 
-def load_db():
+def load_db() -> Chroma:
+    """
+    Loads the existing Chroma vector database using the specified embedding model.
+    
+    Returns:
+        Chroma: The loaded Chroma vector database instance.
+    """
     embedding_model = OllamaEmbeddings(model="deepseek-r1")  # Change model as needed
 
     # Load the existing vector database
@@ -13,7 +19,17 @@ def load_db():
     return vector_db
 
 
-def query_llm(vector_db, query):
+def query_llm(vector_db: Chroma, query: str) -> str:
+    """
+    Queries the LLM using a RetrievalQA chain with the provided vector database and query string.
+    
+    Args:
+        vector_db (Chroma): The vector database to use for retrieval.
+        query (str): The query string to send to the LLM.
+    
+    Returns:
+        str: The processed response from the LLM.
+    """
     # Load the LLM
     llm = OllamaLLM(model="deepseek-r1")
     # Create a RetrievalQA chain
@@ -35,6 +51,15 @@ def query_llm(vector_db, query):
 vector_db = load_db()
 
 def llm_response_finance(query: str) -> str:
+    """
+    Generates a financial expert response to the given query using the LLM and vector database.
+    
+    Args:
+        query (str): The financial question to answer.
+    
+    Returns:
+        str: The LLM's response to the financial query.
+    """
     # Add a financial knowledge prompt to guide the LLM
     system_prompt = (
         "You are a financial expert. Use the information from the provided documents and your financial knowledge to answer the following question as accurately and concisely as possible. "
@@ -46,6 +71,15 @@ def llm_response_finance(query: str) -> str:
 
 
 def llm_response_sit(query: str) -> str:
+    """
+    Generates a response to SIT-related queries using the LLM and vector database.
+    
+    Args:
+        query (str): The SIT-related question to answer.
+    
+    Returns:
+        str: The LLM's response to the SIT query.
+    """
     # Add a SIT knowledge prompt to guide the LLM
     system_prompt = (
         "You are an expert on the Singapore Institute of Technology (SIT). Use the information from the provided documents and your knowledge to answer the following question as accurately and concisely as possible. "
@@ -57,6 +91,17 @@ def llm_response_sit(query: str) -> str:
 
 # For medical debate
 def llm_response_medical_debate(query: str, debate_side: str = "for", debate_round: int = 1) -> str:
+    """
+    Generates a medical debate response from the LLM, tailored to the specified debate side and round.
+    
+    Args:
+        query (str): The debate prompt or opponent's argument.
+        debate_side (str, optional): The side of the debate ("for" or "against"). Defaults to "for".
+        debate_round (int, optional): The current round of the debate. Defaults to 1.
+    
+    Returns:
+        str: The LLM's debate response.
+    """
     if "Topic:" in query and "User's opening argument:" in query:
         parts = query.split("User's opening argument:")
         topic_part = parts[0].strip()

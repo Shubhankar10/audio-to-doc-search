@@ -2,7 +2,13 @@
 import base64
 import streamlit as st
 
-def get_custom_css():
+def get_custom_css() -> str:
+    """
+    Returns a string containing custom CSS styles for the Streamlit app UI.
+    
+    Returns:
+        str: The CSS styles as a string to be injected into the Streamlit app.
+    """
     return """
     <style>
     /* Remove container box while keeping messages styled */
@@ -68,7 +74,16 @@ def get_custom_css():
     </style>
     """
 
-def autoplay_audio(audio_bytes):
+def autoplay_audio(audio_bytes: bytes) -> None:
+    """
+    Autoplays audio in the Streamlit app from the given audio bytes.
+    
+    Args:
+        audio_bytes (bytes): The audio data in bytes to be played.
+    
+    Returns:
+        None
+    """
     audio_base64 = base64.b64encode(audio_bytes).decode()
     audio_html = f"""
         <audio autoplay style="display:none">
@@ -77,7 +92,13 @@ def autoplay_audio(audio_bytes):
     """
     st.markdown(audio_html, unsafe_allow_html=True)
 
-def render_listening_animation():
+def render_listening_animation() -> None:
+    """
+    Renders a listening animation in the Streamlit app to indicate active listening.
+    
+    Returns:
+        None
+    """
     html = """
     <div style="text-align: center; padding: 1rem;">
         <div style="display: inline-flex; align-items: center; gap: 0.5rem; 
@@ -103,7 +124,16 @@ def render_listening_animation():
     """
     st.markdown(html, unsafe_allow_html=True)
 
-def render_message_bubbles(chat_history):
+def render_listening_animation(chat_history: list[dict]) -> None:
+    """
+    Renders the chat history as message bubbles in the Streamlit app.
+    
+    Args:
+        chat_history (list[dict]): A list of message dictionaries with 'role' and 'text' keys.
+    
+    Returns:
+        None
+    """
     for msg in chat_history:
         bubble_class = "user-bubble" if msg["role"] == "user" else "ai-bubble"
         speaker = "You" if msg["role"] == "user" else "AI"
